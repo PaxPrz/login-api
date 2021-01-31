@@ -1,17 +1,30 @@
-from flask import Flask
+import os
+import json
+
+from dotenv import load_dotenv
+load_dotenv()
+
+# from flask import Flask, Response
+from myflask import MyFlask as Flask
 from flask_restful import Resource, Api
 from flask_script import Manager
 from orm import Base, Users, Secrets
-from helpers import create_engine, create_all_tables
-from repository import SqlSession
-from dotenv import load_dotenv
+from helpers import create_all_tables
+from repository import SqlSession, engine
 from exceptions import DatabaseError
+from settings import create_app_settings
+from login import login_blueprint
+from werkzeug.exceptions import HTTPException
 
-load_dotenv()
 
-engine = create_engine()
+settings = create_app_settings(
+    database=os.getenv("DATABASE"),
+    jwt_secret=os.getenv("SECRET"),
+)
 
 app = Flask(__name__)
+app.config["settings"] = settings
+app.register_blueprint(login_blueprint)
 
 manager = Manager(app)
 
@@ -36,6 +49,19 @@ def add_user_secret(name, password, flag):
             raise DatabaseError()
         s = Secrets(data=flag, user_id=admin_id[0])
         sess.add(s)
+
+
+@app.errorhandler(HTTPException)
+def handle_exception(e):
+    response = e.get_response()
+    response.data = json.dumps({
+        "status": e.code,
+        "name": e.name,
+        "description": e.description,
+    })
+    response.context_type = "application/json"
+    return response
+
 
 if __name__ == "__main__":
     manager.run()

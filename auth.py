@@ -1,7 +1,7 @@
 from jose import jwt
 from jose.exceptions import JWSSignatureError
 from time import time
-from .exceptions import InvalidToken, ExpiredToken
+from exceptions import InvalidToken, ExpiredToken
 import logging
 
 

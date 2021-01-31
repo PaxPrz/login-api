@@ -1,6 +1,10 @@
+import os
 from sqlalchemy.orm import sessionmaker
 from contextlib import contextmanager
+from helpers import create_engine
 
+
+engine = create_engine(os.getenv("DATABASE"))
 
 class SqlSession:
     def __init__(self, engine):

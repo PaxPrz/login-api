@@ -5,7 +5,7 @@ import logging
 
 def create_engine(engine="sqlite:///:memory:", echo=False):
     logging.info(f"Creating Database Engine for {engine}")
-    return sa.create_engine(os.getenv("DATABASE", engine), echo=echo)
+    return sa.create_engine(engine, echo=echo)
 
 
 def create_all_tables(Base, engine="sqlite:///:memory:"):
